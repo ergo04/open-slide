@@ -126,6 +126,15 @@ export function Presenter() {
     return () => window.removeEventListener('keydown', onKey);
   }, [goNext, goPrev, toggleBlack, toggleWhite]);
 
+  // On a phone the whole page scrolls, so after reading down through one
+  // slide's notes the next slide would otherwise open mid-way through its own.
+  const shownIndex = state?.index;
+  useEffect(() => {
+    if (shownIndex === undefined) return;
+    if (window.matchMedia('(width < 40rem)').matches)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [shownIndex]);
+
   if (error) {
     return (
       <div className="dark grid h-dvh place-items-center bg-background p-8 text-foreground">
@@ -200,7 +209,7 @@ export function Presenter() {
   }
 
   return (
-    <div className="dark flex h-dvh w-screen flex-col overflow-hidden bg-background text-foreground">
+    <div className="dark flex h-dvh w-screen flex-col overflow-hidden bg-background text-foreground max-sm:h-auto max-sm:min-h-dvh max-sm:overflow-visible">
       <PresenterTopBar
         index={index}
         total={total}
@@ -211,11 +220,11 @@ export function Presenter() {
         onSwitchDeck={switchDeck}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 px-6 pb-4 lg:grid-cols-[2fr_1fr]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 px-6 pb-4 lg:grid-cols-[2fr_1fr] max-sm:flex max-sm:flex-none max-sm:flex-col max-sm:gap-5 max-sm:p-4">
         {/* Now-showing */}
-        <section className="flex min-h-0 flex-col gap-3">
+        <section className="flex min-h-0 flex-col gap-3 max-sm:order-1">
           <SectionLabel>{t.presenter.nowShowing}</SectionLabel>
-          <div className="relative min-h-0 flex-1 overflow-hidden rounded-[8px] bg-black ring-1 ring-border">
+          <div className="relative min-h-0 flex-1 overflow-hidden rounded-[8px] bg-black ring-1 ring-border max-sm:aspect-video max-sm:flex-none">
             <SlideCanvas flat design={slide.design}>
               <SlidePageProvider index={index} total={total}>
                 <PreviewStepHost revealed={stepIndex}>
@@ -238,9 +247,10 @@ export function Presenter() {
           </div>
         </section>
 
-        {/* Next + notes */}
-        <aside className="flex min-h-0 flex-col gap-4">
-          <div className="flex flex-col gap-2">
+        {/* Next + notes. On a phone the aside dissolves so notes can sit
+            right under the current slide — they're read while talking. */}
+        <aside className="flex min-h-0 flex-col gap-4 max-sm:contents">
+          <div className="flex flex-col gap-2 max-sm:order-3">
             <SectionLabel>{hasNext ? t.presenter.upNext : t.presenter.lastSlide}</SectionLabel>
             <div
               className="relative w-full overflow-hidden rounded-[8px] bg-black ring-1 ring-border"
@@ -300,7 +310,7 @@ function PresenterTopBar({
 }) {
   const t = useLocale();
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between border-b border-hairline px-6">
+    <header className="flex h-12 shrink-0 items-center justify-between border-b border-hairline px-6 max-sm:sticky max-sm:top-0 max-sm:z-10 max-sm:h-auto max-sm:flex-wrap max-sm:gap-y-1.5 max-sm:bg-background max-sm:px-4 max-sm:py-2">
       <div className="flex min-w-0 items-center gap-3">
         <span className="eyebrow text-white/45">{t.presenter.eyebrow}</span>
         {slideIds.length > 1 ? (
@@ -316,7 +326,7 @@ function PresenterTopBar({
           </span>
         )}
       </div>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-6 max-sm:gap-3.5">
         <Clock />
         <ElapsedClock startedAt={startedAt} />
         <div className="font-mono text-[18px] tabular-nums">
@@ -510,20 +520,32 @@ function PresenterBottomBar({
 }) {
   const t = useLocale();
   return (
-    <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-hairline px-6 py-3">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={onPrev} disabled={index === 0}>
+    <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-hairline px-6 py-3 max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:flex-col max-sm:items-stretch max-sm:gap-2.5 max-sm:bg-background max-sm:px-4 max-sm:pb-4">
+      {/* On a phone this bar is the remote: thumb-sized, with Next widest. */}
+      <div className="flex items-center gap-2 max-sm:grid max-sm:grid-cols-[1fr_2fr] max-sm:gap-2.5">
+        <Button
+          variant="outline"
+          onClick={onPrev}
+          disabled={index === 0}
+          className={PHONE_PRIMARY_BUTTON}
+        >
           <ChevronLeft className="size-4" /> {t.presenter.prev}
         </Button>
-        <Button variant="outline" onClick={onNext} disabled={index >= total - 1}>
+        <Button
+          variant="outline"
+          onClick={onNext}
+          disabled={index >= total - 1}
+          className={PHONE_PRIMARY_BUTTON}
+        >
           {t.presenter.next} <ChevronRight className="size-4" />
         </Button>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 max-sm:grid max-sm:grid-cols-3 max-sm:gap-2.5">
         <Button
           variant={blackout === 'black' ? 'brand' : 'outline'}
           onClick={onBlackout}
           aria-pressed={blackout === 'black'}
+          className={PHONE_SECONDARY_BUTTON}
         >
           <Square className="size-4 fill-current" /> {t.presenter.black}
         </Button>
@@ -531,6 +553,7 @@ function PresenterBottomBar({
           variant={blackout === 'white' ? 'brand' : 'outline'}
           onClick={onWhiteout}
           aria-pressed={blackout === 'white'}
+          className={PHONE_SECONDARY_BUTTON}
         >
           <Sun className="size-4" /> {t.presenter.white}
         </Button>
@@ -538,6 +561,7 @@ function PresenterBottomBar({
           variant="ghost"
           onClick={() => window.location.reload()}
           title={t.presenter.resetTimer}
+          className={PHONE_SECONDARY_BUTTON}
         >
           <RotateCcw className="size-4" /> {t.presenter.reset}
         </Button>
@@ -545,6 +569,11 @@ function PresenterBottomBar({
     </footer>
   );
 }
+
+const PHONE_PRIMARY_BUTTON =
+  'max-sm:h-18 max-sm:w-full max-sm:touch-manipulation max-sm:rounded-[14px] max-sm:text-[18px] max-sm:[&_svg]:size-5.5';
+const PHONE_SECONDARY_BUTTON =
+  'max-sm:h-13 max-sm:w-full max-sm:touch-manipulation max-sm:rounded-[12px] max-sm:text-[15px]';
 
 const NOTES_FONT_SIZES = [11, 12, 13.5, 15, 17, 20, 24, 28];
 const NOTES_FONT_SIZE_DEFAULT_INDEX = 2;
@@ -565,7 +594,7 @@ function SpeakerNotes({ note }: { note: string | undefined }) {
   }, [sizeIndex]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 max-sm:order-2 max-sm:flex-none">
       <div className="flex items-center justify-between">
         <SectionLabel>{t.presenter.speakerNotes}</SectionLabel>
         <div className="flex items-center gap-1">
@@ -592,7 +621,7 @@ function SpeakerNotes({ note }: { note: string | undefined }) {
         </div>
       </div>
       <div
-        className="min-h-0 flex-1 overflow-y-auto rounded-[6px] border border-border bg-card p-3 leading-relaxed text-card-foreground"
+        className="min-h-0 flex-1 overflow-y-auto rounded-[6px] border border-border bg-card p-3 leading-relaxed text-card-foreground max-sm:min-h-24 max-sm:flex-none max-sm:overflow-visible"
         style={{ fontSize: NOTES_FONT_SIZES[sizeIndex] }}
       >
         {note?.trim() ? (
@@ -632,7 +661,7 @@ function PresenterJumpControl({
           setValue('');
         }
       }}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 max-sm:order-4"
     >
       <SectionLabel>{t.presenter.jump}</SectionLabel>
       <input
