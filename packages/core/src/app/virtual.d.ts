@@ -24,6 +24,18 @@ declare module 'virtual:open-slide/config' {
   export default config;
 }
 
+declare module 'virtual:open-slide/presenter-transport' {
+  import type { CreatePresenterTransport } from './components/present/presenter-transport';
+
+  export const createPresenterTransport: CreatePresenterTransport;
+}
+
+declare module 'virtual:open-slide/presenter-transport/broadcast' {
+  import type { CreatePresenterTransport } from './components/present/presenter-transport';
+
+  export const createBroadcastTransport: CreatePresenterTransport;
+}
+
 declare module 'virtual:open-slide/folders' {
   import type { FoldersManifest } from './lib/sdk';
 

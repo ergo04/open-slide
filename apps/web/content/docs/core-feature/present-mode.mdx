@@ -39,3 +39,54 @@ export const notes = [
   'Pause here for questions. The chart is a hand-off.',
 ];
 ```
+
+## Custom presenter transport
+
+The projection and presenter windows talk over a `BroadcastChannel`, which
+only reaches windows of the same browser. To drive the deck from another
+device — a phone as a remote, a second laptop — replace the transport from a
+Vite plugin (added through [`vite.plugins`](/docs/reference/config#vite)) by
+resolving `virtual:open-slide/presenter-transport` to your own module:
+
+```ts title="remote-transport.ts"
+import type { CreatePresenterTransport } from '@open-slide/core';
+import { createBroadcastTransport } from 'virtual:open-slide/presenter-transport/broadcast';
+
+export const createPresenterTransport: CreatePresenterTransport = (options) => {
+  const local = createBroadcastTransport(options);
+  // Open your network link here and forward messages to options.onMessage.
+  return {
+    send(msg) {
+      local?.send(msg);
+      // …and send msg over the network.
+    },
+    close() {
+      local?.close();
+    },
+  };
+};
+```
+
+```ts title="open-slide.config.ts"
+import path from 'node:path';
+import type { OpenSlideConfig } from '@open-slide/core';
+
+const transport = path.resolve('remote-transport.ts');
+
+const config: OpenSlideConfig = {
+  vite: {
+    plugins: [
+      {
+        name: 'remote-transport',
+        resolveId: (id) => (id === 'virtual:open-slide/presenter-transport' ? transport : null),
+      },
+    ],
+  },
+};
+
+export default config;
+```
+
+The projection window answers `request-state` with a `state` message and
+re-publishes `state` on every change, so a presenter view that joins late
+only needs to send `request-state` once its link is open.

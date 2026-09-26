@@ -1,50 +1,32 @@
+import { createPresenterTransport } from 'virtual:open-slide/presenter-transport';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { PresenterCommand, PresenterTransport } from './presenter-transport';
 
-export type PresenterState = {
-  index: number;
-  pageCount: number;
-  blackout: 'black' | 'white' | null;
-  startedAt: number; // epoch ms when present mode began
-  stepIndex: number;
-  stepCount: number;
-};
-
-export type PresenterCommand =
-  | { type: 'state'; state: PresenterState }
-  | { type: 'goto'; index: number }
-  | { type: 'next' }
-  | { type: 'prev' }
-  | { type: 'request-state' }
-  | { type: 'toggle-blackout'; mode: 'black' | 'white' }
-  | { type: 'switch-slide'; slideId: string };
+export type { PresenterCommand, PresenterState } from './presenter-transport';
 
 type Handler = (msg: PresenterCommand) => void;
 
-const SUPPORTED = typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined';
-
-// Channel ownership lives in the effect (not useMemo) so StrictMode's
-// double-invoke produces a fresh channel on remount rather than leaving a
+// Transport ownership lives in the effect (not useMemo) so StrictMode's
+// double-invoke produces a fresh transport on remount rather than leaving a
 // closed one behind that throws on the next send().
 export function usePresenterChannel(slideId: string, onMessage?: Handler) {
   const onMessageRef = useRef(onMessage);
   onMessageRef.current = onMessage;
 
-  const channelRef = useRef<BroadcastChannel | null>(null);
+  const transportRef = useRef<PresenterTransport | null>(null);
   const [available, setAvailable] = useState(false);
 
   useEffect(() => {
-    if (!SUPPORTED) return;
-    const channel = new BroadcastChannel(`open-slide:presenter:${slideId}`);
-    channelRef.current = channel;
+    const transport = createPresenterTransport({
+      slideId,
+      onMessage: (msg: PresenterCommand) => onMessageRef.current?.(msg),
+    });
+    if (!transport) return;
+    transportRef.current = transport;
     setAvailable(true);
-    const handler = (e: MessageEvent<PresenterCommand>) => {
-      onMessageRef.current?.(e.data);
-    };
-    channel.addEventListener('message', handler);
     return () => {
-      channel.removeEventListener('message', handler);
-      channel.close();
-      if (channelRef.current === channel) channelRef.current = null;
+      transport.close();
+      if (transportRef.current === transport) transportRef.current = null;
       setAvailable(false);
     };
   }, [slideId]);
@@ -52,12 +34,7 @@ export function usePresenterChannel(slideId: string, onMessage?: Handler) {
   return useMemo(
     () => ({
       send(msg: PresenterCommand) {
-        try {
-          channelRef.current?.postMessage(msg);
-        } catch {
-          // Channel may have been closed between the availability check
-          // and the send (e.g. StrictMode unmount mid-flush). Treat as no-op.
-        }
+        transportRef.current?.send(msg);
       },
       available,
     }),

@@ -3,6 +3,13 @@ export { ImagePlaceholder } from './app/components/image-placeholder.tsx';
 export type { MorphElementProps } from './app/components/morph-element.tsx';
 export { MorphElement } from './app/components/morph-element.tsx';
 export type {
+  CreatePresenterTransport,
+  PresenterCommand,
+  PresenterState,
+  PresenterTransport,
+  PresenterTransportOptions,
+} from './app/components/present/presenter-transport.ts';
+export type {
   DesignFonts,
   DesignPalette,
   DesignSystem,
