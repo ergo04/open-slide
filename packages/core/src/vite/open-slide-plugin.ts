@@ -234,7 +234,10 @@ export function openSlidePlugin(opts: OpenSlidePluginOptions): Plugin {
               showSlideUi: userBuild.showSlideUi ?? true,
               allowHtmlDownload: userBuild.allowHtmlDownload ?? true,
             };
-        const resolvedConfig = { ...config, build: buildResolved, version: coreVersion };
+        // Plugins are build-time objects (functions, and often cycles), so
+        // they must never reach the serialized client config.
+        const { vite: _vite, ...clientConfig } = config;
+        const resolvedConfig = { ...clientConfig, build: buildResolved, version: coreVersion };
         return `export default ${JSON.stringify(resolvedConfig)};\n`;
       }
       if (id === resolved(FOLDERS_VMOD)) {

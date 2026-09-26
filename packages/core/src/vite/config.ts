@@ -83,6 +83,7 @@ export async function createViteConfig(opts: CreateViteConfigOptions): Promise<I
       apiPlugin({ userCwd, slidesDir, assetsDir, coreVersion: CORE_VERSION }),
       notesPlugin({ userCwd, slidesDir }),
       currentPlugin({ userCwd, slidesDir }),
+      ...(config.vite?.plugins ?? []),
     ],
     resolve: {
       alias: {

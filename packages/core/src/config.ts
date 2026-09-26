@@ -1,9 +1,19 @@
+import type { PluginOption } from 'vite';
 import type { Locale } from './locale/types';
 
 export type OpenSlideBuildConfig = {
   showSlideBrowser?: boolean;
   showSlideUi?: boolean;
   allowHtmlDownload?: boolean;
+};
+
+export type OpenSlideViteConfig = {
+  /**
+   * Extra Vite plugins, appended after open-slide's own. They run in `dev`,
+   * `build` and `preview`, so a plugin can add routes to the dev server,
+   * inject scripts into the page, or replace a runtime module.
+   */
+  plugins?: PluginOption[];
 };
 
 export type OpenSlideConfig = {
@@ -20,4 +30,5 @@ export type OpenSlideConfig = {
    */
   locale?: Locale;
   build?: OpenSlideBuildConfig;
+  vite?: OpenSlideViteConfig;
 };

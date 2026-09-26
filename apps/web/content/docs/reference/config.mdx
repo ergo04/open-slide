@@ -53,6 +53,11 @@ export default config;
       default: 'all toggles on',
       description: 'Build-time UI toggles (see below).',
     },
+    vite: {
+      type: 'OpenSlideViteConfig',
+      default: '{}',
+      description: 'Extra Vite plugins (see below).',
+    },
     locale: {
       type: 'Locale',
       deprecated: true,
@@ -85,6 +90,33 @@ dev server always shows the full UI.
     },
   }}
 />
+
+### `vite`
+
+open-slide owns the Vite config, so there is no `vite.config.ts` to edit.
+Plugins listed here are appended after open-slide's own and run in `dev`,
+`build` and `preview`.
+
+<TypeTable
+  type={{
+    plugins: {
+      type: 'PluginOption[]',
+      default: '[]',
+      description: 'Vite plugins added to the dev server and the build.',
+    },
+  }}
+/>
+
+```ts
+import type { OpenSlideConfig } from '@open-slide/core';
+import myPlugin from './my-plugin';
+
+const config: OpenSlideConfig = {
+  vite: { plugins: [myPlugin()] },
+};
+```
+
+Plugins only exist at build time: they are not serialized into the page.
 
 ## Common recipes
 

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { generateSlidesModule } from './open-slide-plugin.ts';
+import { generateSlidesModule, openSlidePlugin } from './open-slide-plugin.ts';
 
 async function withSlidesRoot<T>(fn: (root: string) => Promise<T>): Promise<T> {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'open-slide-test-'));
@@ -46,5 +46,22 @@ describe('generateSlidesModule', () => {
       expect(code).toContain('export const slideIds = ["cover"];');
       expect(code).not.toContain('推薦系統');
     });
+  });
+});
+
+describe('virtual:open-slide/config', () => {
+  it('does not serialize user Vite plugins into the client config', async () => {
+    const plugin = openSlidePlugin({
+      userCwd: os.tmpdir(),
+      config: { base: '/deck/', vite: { plugins: [{ name: 'user:extra' }] } },
+      coreVersion: '0.0.0-test',
+    });
+    const load = plugin.load as (id: string) => Promise<string | null>;
+
+    const code = await load.call({}, '\0virtual:open-slide/config');
+
+    expect(code).toContain('"base":"/deck/"');
+    expect(code).not.toContain('user:extra');
+    expect(code).not.toContain('"vite"');
   });
 });
