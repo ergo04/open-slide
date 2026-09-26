@@ -57,3 +57,10 @@ declare module '*.otf' {
   const src: string;
   export default src;
 }
+
+// Default presenter transport, for replacements that wrap it instead of
+// starting from scratch (see "Custom presenter transport" in the docs).
+declare module 'virtual:open-slide/presenter-transport/broadcast' {
+  import type { CreatePresenterTransport } from '@open-slide/core';
+  export const createBroadcastTransport: CreatePresenterTransport;
+}
