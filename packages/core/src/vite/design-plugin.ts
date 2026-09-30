@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Plugin, ViteDevServer } from 'vite';
-import { type DesignSystem, defaultDesign } from '../app/lib/design.ts';
+import { type DesignPatch, type DesignSystem, defaultDesign } from '../app/lib/design.ts';
 import { type AstNode, parseSource, tryParse } from '../editing/babel-walk.ts';
 import { jsString } from '../editing/edit-ops.ts';
 import { resolveSlideEntry } from '../editing/slide-ops.ts';
@@ -122,11 +122,13 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-export function mergeDesign(base: DesignSystem, patch: Partial<DesignSystem>): DesignSystem {
+export function mergeDesign(base: DesignSystem, patch: DesignPatch): DesignSystem {
   const out = JSON.parse(JSON.stringify(base)) as DesignSystem;
   const apply = (target: Record<string, unknown>, src: Record<string, unknown>) => {
     for (const [k, v] of Object.entries(src)) {
-      if (isPlainObject(v) && isPlainObject(target[k])) {
+      if (v === null) {
+        delete target[k];
+      } else if (isPlainObject(v) && isPlainObject(target[k])) {
         apply(target[k] as Record<string, unknown>, v);
       } else {
         target[k] = v;
@@ -193,7 +195,7 @@ export function parseSlideDesign(source: string): ParsedSlideDesign {
   } catch (err) {
     return { ok: false, exists: true, error: (err as Error).message };
   }
-  const merged = mergeDesign(defaultDesign, value as Partial<DesignSystem>);
+  const merged = mergeDesign(defaultDesign, value as DesignPatch);
   return { ok: true, design: merged, loc };
 }
 
@@ -380,7 +382,7 @@ export function designPlugin(opts: DesignPluginOptions): Plugin {
             if (!requestCheck.ok) {
               return json(res, requestCheck.status, { error: requestCheck.error });
             }
-            const body = (await readBody(req)) as { patch?: Partial<DesignSystem> };
+            const body = (await readBody(req)) as { patch?: DesignPatch };
             const patch = body.patch;
             if (!patch || typeof patch !== 'object') {
               return json(res, 400, { error: 'missing patch object' });

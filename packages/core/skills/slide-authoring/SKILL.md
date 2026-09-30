@@ -174,6 +174,8 @@ A slide can declare typed design tokens at the top of `index.tsx` — `export co
 
 `references/design-system.md` has the full token shape, the two consumption surfaces (`var(--osd-X)` vs direct `design.X` reads), Design panel behavior, and the format constraints the panel's AST writer requires. Read it before writing the const.
 
+In present mode, the bands around a letterboxed deck take `design.palette.bg`. If pages paint their own backgrounds (a dark cover, a full-bleed accent page), those bands make the page look cropped — set `design.palette.letterbox` (e.g. `'#000'`) to pick the band color instead.
+
 ## Starter template
 
 ```tsx

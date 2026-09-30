@@ -258,7 +258,7 @@ function buildHtml(opts: {
 <title>${escapeHtml(opts.title)}</title>
 ${opts.externalLinks}
 <style>
-html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: system-ui, sans-serif; }
+html, body { margin: 0; height: 100%; background: ${opts.design?.palette.letterbox ?? '#000'}; overflow: hidden; font-family: system-ui, sans-serif; }
 .os-stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
 .os-frame { width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px; flex-shrink: 0; background: #fff; color: #000; transform-origin: center center; overflow: hidden; position: relative; }
 .os-page { position: absolute; inset: 0; }

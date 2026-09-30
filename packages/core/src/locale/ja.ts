@@ -324,6 +324,7 @@ export const ja: Locale = {
     backgroundLabel: '背景',
     textLabel: 'テキスト',
     accentLabel: 'アクセント',
+    letterboxLabel: 'レターボックス',
     displayFontLabel: '見出し',
     bodyFontLabel: '本文',
     heroLabel: 'ヒーロー',

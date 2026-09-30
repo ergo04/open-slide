@@ -318,6 +318,7 @@ export type Locale = {
     backgroundLabel: string;
     textLabel: string;
     accentLabel: string;
+    letterboxLabel: string;
     displayFontLabel: string;
     bodyFontLabel: string;
     heroLabel: string;

@@ -89,6 +89,14 @@ describe('mergeDesign', () => {
     });
     expect(JSON.stringify(defaultDesign)).toBe(before);
   });
+
+  it('removes an optional token patched to null', () => {
+    const withLetterbox = mergeDesign(defaultDesign, { palette: { letterbox: '#000' } });
+    expect(withLetterbox.palette.letterbox).toBe('#000');
+    const cleared = mergeDesign(withLetterbox, { palette: { letterbox: null } });
+    expect(cleared.palette).not.toHaveProperty('letterbox');
+    expect(cleared.palette.bg).toBe(defaultDesign.palette.bg);
+  });
 });
 
 describe('applyDesignWrite — slide with existing design', () => {

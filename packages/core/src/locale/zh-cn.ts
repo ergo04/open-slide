@@ -317,6 +317,7 @@ export const zhCN: Locale = {
     backgroundLabel: '背景',
     textLabel: '文字',
     accentLabel: '强调色',
+    letterboxLabel: '黑边',
     displayFontLabel: '展示',
     bodyFontLabel: '正文',
     heroLabel: '主标',

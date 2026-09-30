@@ -317,6 +317,7 @@ export const zhTW: Locale = {
     backgroundLabel: '背景',
     textLabel: '文字',
     accentLabel: '強調色',
+    letterboxLabel: '黑邊',
     displayFontLabel: '顯示',
     bodyFontLabel: '內文',
     heroLabel: '主標',

@@ -115,6 +115,23 @@ export function DesignPanel({ onClose }: DesignPanelProps) {
             }, 'design:palette.accent')
           }
         />
+        <ColorField
+          label={t.stylePanel.letterboxLabel}
+          value={draft.palette.letterbox ?? draft.palette.bg}
+          onChange={(v) =>
+            update((d) => {
+              d.palette.letterbox = v;
+            }, 'design:palette.letterbox')
+          }
+          onClear={
+            draft.palette.letterbox === undefined
+              ? undefined
+              : () =>
+                  update((d) => {
+                    delete d.palette.letterbox;
+                  })
+          }
+        />
       </Section>
 
       <Section title={t.stylePanel.typographySection}>

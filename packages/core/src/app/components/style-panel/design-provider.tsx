@@ -77,7 +77,12 @@ export function DesignProvider({ slideId, children }: { slideId: string; childre
   const commit = useCallback(async () => {
     if (!draft) return;
     setCommitting(true);
-    const r = await save(draft);
+    // The server merges the patch into the file, so clearing an override
+    // takes an explicit null.
+    const r = await save({
+      ...draft,
+      palette: { ...draft.palette, letterbox: draft.palette.letterbox ?? null },
+    });
     setCommitting(false);
     if (!r.ok) toast.error(r.error ?? 'Failed to save');
     history.clear();

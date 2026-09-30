@@ -402,7 +402,7 @@ export function Player({
         controls && 'select-none',
         controls && (hideCursor ? 'cursor-none' : 'cursor-default'),
       )}
-      style={design ? { background: design.palette.bg } : undefined}
+      style={design ? { background: design.palette.letterbox ?? design.palette.bg } : undefined}
     >
       <SlideCanvas flat design={design}>
         {/* Keyed per deck so a presenter-driven deck switch cuts instead of

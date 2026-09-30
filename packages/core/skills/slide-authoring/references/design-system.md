@@ -18,6 +18,8 @@ export const design: DesignSystem = {
 
 `export` it (rather than plain `const`) so the framework can read the object and inject CSS variables at the canvas root automatically.
 
+`palette.letterbox` is optional: the color of the bands around the deck in present mode on screens that aren't 16:9. Without it they take `bg`. It has no CSS var — pages never paint with it.
+
 The shape is intentionally minimal — it only covers what the Design panel can currently tweak. Anything outside this set (heading sizes, spacing, motion, extra palette colors) belongs as plain hard-coded constants in the slide file.
 
 ## Two consumption surfaces

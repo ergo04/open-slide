@@ -320,6 +320,7 @@ export const en: Locale = {
     backgroundLabel: 'Background',
     textLabel: 'Text',
     accentLabel: 'Accent',
+    letterboxLabel: 'Letterbox',
     displayFontLabel: 'Display',
     bodyFontLabel: 'Body',
     heroLabel: 'Hero',

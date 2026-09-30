@@ -2,6 +2,12 @@ export type DesignPalette = {
   bg: string;
   text: string;
   accent: string;
+  /**
+   * Bands around the canvas in present mode when the screen isn't 16:9.
+   * Falls back to `bg`, which reads as a cropped page on decks whose pages
+   * paint their own backgrounds.
+   */
+  letterbox?: string;
 };
 
 export type DesignFonts = {
@@ -20,6 +26,11 @@ export type DesignSystem = {
   typeScale: DesignTypeScale;
   radius: number;
 };
+
+type Patch<T> = { [K in keyof T]?: T[K] extends object ? Patch<T[K]> : T[K] | null };
+
+/** Merged into a slide's `design`; `null` removes an optional token, since JSON drops `undefined`. */
+export type DesignPatch = Patch<DesignSystem>;
 
 export function designToCssVars(d: DesignSystem): Record<string, string> {
   return {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { DesignSystem } from '../../lib/design';
+import type { DesignPatch, DesignSystem } from '../../lib/design';
 
 type FetchedState = {
   design: DesignSystem | null;
@@ -9,7 +9,7 @@ type FetchedState = {
 };
 
 export type UseDesignReturn = FetchedState & {
-  save: (patch: Partial<DesignSystem>) => Promise<{ ok: boolean; error?: string }>;
+  save: (patch: DesignPatch) => Promise<{ ok: boolean; error?: string }>;
 };
 
 export function useDesign(slideId: string): UseDesignReturn {
@@ -49,7 +49,7 @@ export function useDesign(slideId: string): UseDesignReturn {
     void refresh();
   }, [refresh]);
 
-  const save = useCallback(async (patch: Partial<DesignSystem>) => {
+  const save = useCallback(async (patch: DesignPatch) => {
     const id = slideIdRef.current;
     if (!id) return { ok: false, error: 'no slide id' };
     try {
